@@ -7,9 +7,9 @@ import com.example.WalletManager.repository.TransactionResultRepository
 import com.example.WalletManager.repository.UserRepository
 import com.example.WalletManager.repository.WalletRepository
 import org.springframework.stereotype.Service
-import java.util.Calendar
 import javax.transaction.Transactional
 import com.fasterxml.jackson.databind.ObjectMapper
+import java.util.*
 
 
 @Service
@@ -24,10 +24,10 @@ class UserServiceImp(
     override fun getUserById(id: Int): FullUser {
         val user = userDB.findById(id)
         val wallet = walletDB.findByUserId(id)
-        println(wallet)
         return FullUser(id, user.get().ownerName, wallet!!.get().balance)
     }
 
+    @Transactional
     override fun createNewUser(userName: SetOrChangeName): String {
         val user = userDB.save(User(name = userName.name))
         val userId = user.id
@@ -36,45 +36,50 @@ class UserServiceImp(
     }
 
     override fun transaction(transaction: Transaction): String {
-        val kafkaMessage = objectMapper.writeValueAsString(transaction)
-        kafkaProducer.sendEvent(kafkaMessage)
-        return "The transaction was successfully added to the transaction queue"
+        val isValid = validateTransactionInput(transaction)
+        return if (isValid) {
+            val kafkaMessage = objectMapper.writeValueAsString(transaction)
+            kafkaProducer.sendEvent(kafkaMessage)
+            "The transaction was successfully added to the transaction queue"
+        } else "Invalid input!"
     }
 
     @Transactional
     fun makeTransaction(transaction: Transaction) {
-        println("transaction made!!!!!")
-        val now = Calendar.getInstance()
-        val transactionResult = TransactionResult()
-        validateTransactionInput(transaction)
         val wallet = walletDB.findByUserId(transaction.userId)!!.get()
         if (transaction.transactionType == TransactionType.DECREASE) {
             if (wallet.balance!! < transaction.amount) {
-                transactionResult.id = "$now-${transaction.userId}"
-                transactionResult.userId = transaction.userId
-                transactionResult.failureReason = "NotEnoughBalance"
-                transactionResult.isSuccessful = false
-//                transactionES.save(transactionResult)
+                val transactionResult = TransactionResult(false, transaction.userId, "User does not have enough balance")
+                transactionES.save(transactionResult)
+            } else {
+                wallet.balance = wallet.balance?.minus(transaction.amount)
+                walletDB.save(wallet)
+                transactionES.save(TransactionResult(true, transaction.userId, "None"))
             }
-            wallet.balance = wallet.balance?.minus(transaction.amount)
+        } else {
+            wallet.balance = wallet.balance?.plus(transaction.amount)
             walletDB.save(wallet)
+            transactionES.save(TransactionResult(true, transaction.userId, "None"))
         }
-        wallet.balance = wallet.balance?.plus(transaction.amount)
-        walletDB.save(wallet)
     }
 
-    private fun validateTransactionInput(transaction: Transaction) {
-        println("=-3=2-030-2=03-=02-03-02-=03-02-30-=02-30-=02-30=02-=30")
-
+    private fun validateTransactionInput(transaction: Transaction): Boolean {
         if (transaction.amount < 0) {
-//            transactionES.save(TransactionResult(false, transaction.userId, "Negative Transaction Amount"))
-            throw Exception("INVALID AMOUNT!")
+            transactionES.save(TransactionResult(false, transaction.userId, "Negative Transaction Amount"))
+            return false
         }
         if (transaction.transactionType != TransactionType.INCREASE && transaction.transactionType != TransactionType.DECREASE) {
-            throw Exception("INVALID TRANSACTION TYPE")
+            transactionES.save(TransactionResult(false, transaction.userId, "Invalid TransactionType as Input"))
+            return false
         }
+        if (Optional.empty<Wallet>() ==  walletDB.findByUserId(transaction.userId)) {
+            transactionES.save(TransactionResult(false, transaction.userId, "Invalid userId input"))
+            return false
+        }
+        return true
     }
 
+    @Transactional
     override fun renameUser(newName: SetOrChangeName, id: Int): String {
         val user = userDB.findById(id)
         user.get().ownerName = newName.name
