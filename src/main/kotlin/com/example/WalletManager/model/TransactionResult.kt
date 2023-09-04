@@ -13,18 +13,18 @@ import javax.persistence.Id
 
 @Document(indexName = "transaction_result", shards = 8)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-class TransactionResult(isSuccessful: Boolean, userId: Int, failureReason: String) {
+class TransactionResult() {
 
     @Id
-    var id: Int? = null
+    var id: String? = null
 
     @Field
-    var isSuccessful: Boolean? = isSuccessful
+    var isSuccessful: Boolean? = null
 
     @Field(name = "user_id", type = FieldType.Integer, storeNullValue = false)
-    var userId: Int? = userId
+    var userId: Int? = null
 
     @Field
-    var failureReason: String? = failureReason
+    var failureReason: String? = null
 
 }

@@ -13,6 +13,7 @@ import java.util.*
 @RequestMapping("/api/Wallet/User")
 interface UserService {
     @GetMapping("/{id}")
+//    fun getUserById(@PathVariable id: Int)
     fun getUserById(@PathVariable id: Int): FullUser?
 
     @PostMapping("/Create")
