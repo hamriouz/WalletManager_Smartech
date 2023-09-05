@@ -1,4 +1,4 @@
-package com.example.WalletManager
+package com.example.walletmanager
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
