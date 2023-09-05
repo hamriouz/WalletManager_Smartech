@@ -7,7 +7,7 @@ import org.springframework.kafka.config.TopicBuilder
 @Configuration
 open class KafkaConfig {
     @Bean
-    open fun topicCreate(): NewTopic {
+    fun topicCreate(): NewTopic {
         return TopicBuilder.name(AppConstants.TOPIC_NAME).build()
     }
 }
