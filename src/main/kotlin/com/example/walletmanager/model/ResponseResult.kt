@@ -1,4 +1,4 @@
-package com.example.WalletManager.model
+package com.example.walletmanager.model
 
 enum class ResponseResult {
     OK, ERROR

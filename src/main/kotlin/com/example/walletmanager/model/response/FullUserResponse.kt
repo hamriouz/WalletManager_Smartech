@@ -1,6 +1,6 @@
-package com.example.WalletManager.model.response
+package com.example.walletmanager.model.response
 
-import com.example.WalletManager.model.ResponseResult
+import com.example.walletmanager.model.ResponseResult
 
 class FullUserResponse(
     val userId: Int,

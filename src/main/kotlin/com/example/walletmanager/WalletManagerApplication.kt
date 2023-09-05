@@ -1,4 +1,4 @@
-package com.example.WalletManager
+package com.example.walletmanager
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

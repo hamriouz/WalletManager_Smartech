@@ -1,6 +1,6 @@
-package com.example.WalletManager.repository
+package com.example.walletmanager.repository
 
-import com.example.WalletManager.model.Wallet
+import com.example.walletmanager.model.Wallet
 import org.springframework.stereotype.Repository
 import org.springframework.data.repository.CrudRepository
 

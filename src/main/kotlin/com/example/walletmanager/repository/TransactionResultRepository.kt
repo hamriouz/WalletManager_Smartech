@@ -1,6 +1,6 @@
-package com.example.WalletManager.repository
+package com.example.walletmanager.repository
 
-import com.example.WalletManager.model.TransactionResult
+import com.example.walletmanager.model.TransactionResult
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository
 

@@ -1,4 +1,4 @@
-package com.example.WalletManager.model
+package com.example.walletmanager.model
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
