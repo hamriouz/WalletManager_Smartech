@@ -28,11 +28,11 @@ class UserServiceImp(
     }
 
     @Transactional
-    override fun createNewUser(userName: SetOrChangeName): String {
+    override fun createNewUser(userName: SetOrChangeName): Int {
         val user = userDB.save(User(name = userName.name))
         val userId = user.id
         walletDB.save(Wallet(userId, 0))
-        return "User created with id $userId"
+        return userId!!
     }
 
     override fun transaction(transaction: Transaction): String {
@@ -63,7 +63,7 @@ class UserServiceImp(
         }
     }
 
-    private fun validateTransactionInput(transaction: Transaction): Boolean {
+    fun validateTransactionInput(transaction: Transaction): Boolean {
         if (transaction.amount < 0) {
             transactionES.save(TransactionResult(false, transaction.userId, "Negative Transaction Amount"))
             return false
