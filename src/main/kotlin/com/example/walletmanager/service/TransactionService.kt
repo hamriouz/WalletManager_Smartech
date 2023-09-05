@@ -10,7 +10,7 @@ import com.example.walletmanager.model.response.TransactionResponse
 import com.example.walletmanager.repository.TransactionResultRepository
 import com.example.walletmanager.repository.WalletRepository
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.aspectj.apache.bcel.classfile.JavaClass
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
@@ -21,6 +21,8 @@ class TransactionService(
     private val objectMapper: ObjectMapper,
     val kafkaTemplate: KafkaTemplate<String, String>,
 ): TransactionController {
+    var logger = LoggerFactory.getLogger(TransactionService::class.java)!!
+
     override fun start(transaction: Transaction): TransactionResponse? {
         val errors = validateTransactionInput(transaction)
         if (errors.isEmpty()) {
@@ -38,17 +40,22 @@ class TransactionService(
             wallet.balance = wallet.balance?.plus(transaction.amount)
         }
         walletRepository.save(wallet)
+        logger.info("TransactionService::makeTransaction::userId=${transaction.userId}::amount=${transaction.amount}::type=${transaction.type}")
         transactionResultRepository.save(TransactionResult(true, transaction.userId, "None"))
     }
 
     fun validateTransactionInput(transaction: Transaction): Array<String> {
         var errors = arrayOf<String>()
+        var errorMessage: String?
         if (transaction.amount < 0) {
-            errors += "Negative Transaction Amount"
+            errorMessage = "Negative Transaction Amount"
+            logger.error(errorMessage)
+            errors += errorMessage
         }
 
         if (walletRepository.findByUserId(transaction.userId) == null) {
-            errors += "Invalid userId input"
+            errorMessage = "Invalid userId input"
+            errors += errorMessage
         }
         return errors
     }
