@@ -9,8 +9,6 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "user_wallet")
-
-
 class Wallet() {
     constructor(userId: Int?, balance: Int) : this() {
         this.userId = userId
