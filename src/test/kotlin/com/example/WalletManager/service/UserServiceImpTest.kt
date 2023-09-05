@@ -31,7 +31,7 @@ class UserServiceImpTest @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(newUser)
         }
-        val user = userRepository.findById(1)
+        val user = userRepository.findById(3)
         assertEquals("newUser", user.get().ownerName)
     }
 
