@@ -3,6 +3,8 @@ package com.example.WalletManager.service
 import com.example.WalletManager.UserService
 import com.example.WalletManager.kafka.KafkaProducer
 import com.example.WalletManager.model.*
+import com.example.WalletManager.model.response.FullUserResponse
+import com.example.WalletManager.model.response.TransactionResponse
 import com.example.WalletManager.repository.TransactionResultRepository
 import com.example.WalletManager.repository.UserRepository
 import com.example.WalletManager.repository.WalletRepository
@@ -21,27 +23,29 @@ class UserServiceImp(
     private val objectMapper: ObjectMapper,
 ) : UserService {
 
-    override fun getUserById(id: Int): FullUser {
+    override fun getUserById(id: Int): FullUserResponse {
         val user = userDB.findById(id)
         val wallet = walletDB.findByUserId(id)
-        return FullUser(id, user.get().ownerName, wallet!!.get().balance)
+        return FullUserResponse(id, user.get().ownerName, wallet!!.get().balance, ResponseResult.OK)
     }
 
     @Transactional
-    override fun createNewUser(userName: SetOrChangeName): Int {
+    override fun createNewUser(userName: SetOrChangeName): FullUserResponse? {
         val user = userDB.save(User(name = userName.name))
         val userId = user.id
         walletDB.save(Wallet(userId, 0))
-        return userId!!
+        return getUserById(userId!!)
     }
 
-    override fun transaction(transaction: Transaction): String {
+    override fun transaction(transaction: Transaction): TransactionResponse? {
         val isValid = validateTransactionInput(transaction)
-        return if (isValid) {
+        if (isValid) {
             val kafkaMessage = objectMapper.writeValueAsString(transaction)
             kafkaProducer.sendEvent(kafkaMessage)
-            "The transaction was successfully added to the transaction queue"
-        } else "Invalid input!"
+            return TransactionResponse("The transaction was successfully added to the transaction queue", ResponseResult.OK)
+    
+        }
+        return TransactionResponse("Invalid input", ResponseResult.ERROR)
     }
 
     @Transactional
@@ -81,12 +85,11 @@ class UserServiceImp(
     }
 
     @Transactional
-    override fun renameUser(newName: SetOrChangeName, id: Int): String {
+    override fun renameUser(newName: SetOrChangeName, id: Int): FullUserResponse? {
         val user = userDB.findById(id)
         user.get().ownerName = newName.name
         userDB.save(user.get())
-        val name = newName.name
-        return "User's name with userid $id was successfully changed to $name"
+        return getUserById(id)
     }
 }
 
