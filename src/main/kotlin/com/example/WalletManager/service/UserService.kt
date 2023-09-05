@@ -16,7 +16,7 @@ interface UserService {
 
     @PostMapping("/Create")
     @ResponseStatus(HttpStatus.CREATED)
-    fun createNewUser(@RequestBody userName: SetOrChangeName ): Int
+    fun createNewUser(@RequestBody userName: SetOrChangeName): Int
 
     @PutMapping("/Transaction")
     @ResponseStatus(HttpStatus.OK)

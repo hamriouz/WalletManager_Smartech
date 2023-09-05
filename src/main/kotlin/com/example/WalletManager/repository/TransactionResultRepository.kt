@@ -5,6 +5,6 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface TransactionResultRepository: ElasticsearchRepository<TransactionResult, Int> {
+interface TransactionResultRepository : ElasticsearchRepository<TransactionResult, Int> {
 
 }

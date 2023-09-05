@@ -49,7 +49,8 @@ class UserServiceImp(
         val wallet = walletDB.findByUserId(transaction.userId)!!.get()
         if (transaction.transactionType == TransactionType.DECREASE) {
             if (wallet.balance!! < transaction.amount) {
-                val transactionResult = TransactionResult(false, transaction.userId, "User does not have enough balance")
+                val transactionResult =
+                    TransactionResult(false, transaction.userId, "User does not have enough balance")
                 transactionES.save(transactionResult)
             } else {
                 wallet.balance = wallet.balance?.minus(transaction.amount)
@@ -72,7 +73,7 @@ class UserServiceImp(
             transactionES.save(TransactionResult(false, transaction.userId, "Invalid TransactionType as Input"))
             return false
         }
-        if (Optional.empty<Wallet>() ==  walletDB.findByUserId(transaction.userId)) {
+        if (Optional.empty<Wallet>() == walletDB.findByUserId(transaction.userId)) {
             transactionES.save(TransactionResult(false, transaction.userId, "Invalid userId input"))
             return false
         }

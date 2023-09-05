@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class WalletManagerApplication
 
 fun main(args: Array<String>) {
-	runApplication<WalletManagerApplication>(*args)
+    runApplication<WalletManagerApplication>(*args)
 }

@@ -7,7 +7,7 @@ import java.util.Optional
 
 
 @Repository
-interface WalletRepository: CrudRepository<Wallet, Int> {
+interface WalletRepository : CrudRepository<Wallet, Int> {
     fun findByUserId(userId: Int): Optional<Wallet>?
 }
 

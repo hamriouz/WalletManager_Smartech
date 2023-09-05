@@ -11,8 +11,8 @@ import javax.persistence.Table
 @Table(name = "user_wallet")
 
 
-class Wallet () {
-    constructor(userId: Int?, balance: Int): this() {
+class Wallet() {
+    constructor(userId: Int?, balance: Int) : this() {
         this.userId = userId
         this.balance = 0
     }
