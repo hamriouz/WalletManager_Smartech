@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import javax.transaction.Transactional
 
 @Service
 class TransactionService(
@@ -45,22 +46,23 @@ class TransactionService(
             wallet.balance = wallet.balance?.plus(transaction.amount)
         }
         walletRepository.save(wallet)
+//        throw RuntimeException("Test")
         logger.info("TransactionService::makeTransaction::userId=${transaction.userId}::amount=${transaction.amount}::type=${transaction.type}")
         transactionResultRepository.save(TransactionResult(true, transaction.userId, "None"))
     }
 
-    fun validateTransactionInput(transaction: Transaction): Array<String> {
-        var errors = arrayOf<String>()
+    fun validateInput(transaction: Transaction): MutableList<String> {
+        var errors = mutableListOf<String>()
         var errorMessage: String?
         if (transaction.amount < 0) {
             errorMessage = "Negative Transaction Amount"
             logger.error(errorMessage)
-            errors += errorMessage
+            errors.add(errorMessage)
         }
 
         if (walletRepository.findByUserId(transaction.userId) == null) {
             errorMessage = "Invalid userId input"
-            errors += errorMessage
+            errors.add(errorMessage)
         }
         return errors
     }

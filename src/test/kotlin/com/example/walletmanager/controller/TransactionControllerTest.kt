@@ -22,7 +22,7 @@ class TransactionControllerTest @Autowired constructor(
     @Test
     fun `should contain amount is negative error`() {
         val transaction = Transaction(TransactionType.DECREASE, 123, -100)
-        val errors = transactionService.validateTransactionInput(transaction)
+        val errors = transactionService.validateInput(transaction)
         println(errors)
         assertTrue(errors.contains("Negative Transaction Amount"))
     }
@@ -30,7 +30,7 @@ class TransactionControllerTest @Autowired constructor(
     @Test
     fun `should return false when userId does not exist`() {
         val transaction = Transaction(TransactionType.DECREASE, 123, 100)
-        val errors = transactionService.validateTransactionInput(transaction)
+        val errors = transactionService.validateInput(transaction)
         assertTrue(errors.contains("Invalid userId input"))
     }
 
@@ -38,7 +38,7 @@ class TransactionControllerTest @Autowired constructor(
     fun `should return true when all fields where ok`() {
         val user = userService.create(SetOrChangeName("usssernaaame"))
         val transaction = user?.let { Transaction(TransactionType.INCREASE, it.userId, 1000) }
-        val errors = transaction?.let { transactionService.validateTransactionInput(it) }
+        val errors = transaction?.let { transactionService.validateInput(it) }
         assertTrue(errors!!.isEmpty())
     }
 }

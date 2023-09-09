@@ -6,6 +6,7 @@ class FullUserResponse(
     val userId: Int,
     val userName: String?,
     val balance: Int?,
-    val status: ResponseResult
+    val status: ResponseResult,
+    val errors: MutableList<String>
 ) {}
 

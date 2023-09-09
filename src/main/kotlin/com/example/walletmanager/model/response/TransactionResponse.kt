@@ -4,7 +4,7 @@ import com.example.walletmanager.model.ResponseResult
 
 
 class TransactionResponse(
-    val transactionErrors: Array<String>,
+    val transactionErrors: MutableList<String>,
     val status: ResponseResult,
 )
 
