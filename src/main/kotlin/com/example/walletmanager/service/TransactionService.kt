@@ -23,8 +23,8 @@ class TransactionService(
 ): TransactionController {
     var logger = LoggerFactory.getLogger(TransactionService::class.java)!!
 
-    override fun start(transaction: Transaction): TransactionResponse? {
-        val errors = validateTransactionInput(transaction)
+    override fun create(transaction: Transaction): TransactionResponse? {
+        val errors = validateInput(transaction)
         if (errors.isEmpty()) {
             kafkaTemplate.send(AppConstants.KAFKA_TRANSACTION, objectMapper.writeValueAsString(transaction))
             return TransactionResponse(errors, ResponseResult.OK)
@@ -32,7 +32,12 @@ class TransactionService(
         return TransactionResponse(errors, ResponseResult.ERROR)
     }
 
-    fun makeTransaction(transaction: Transaction) {
+    fun makeTransaction2(transaction: Transaction) {
+        this.start(transaction)
+    }
+
+    @Transactional
+    fun start(transaction: Transaction) {
         val wallet = walletRepository.findByUserId(transaction.userId)!!
         if (transaction.type == TransactionType.DECREASE && wallet.balance!! >= transaction.amount) {
                 wallet.balance = wallet.balance?.minus(transaction.amount)

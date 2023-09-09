@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service
 @Service
 class KafkaConsumer(
     private val objectMapper: ObjectMapper,
-    private val transactionControllerImp: TransactionService
+    private val transactionService: TransactionService
 
     ) {
     @KafkaListener(topics = [AppConstants.KAFKA_TRANSACTION])
     fun listen(msg: String) {
         val transaction = objectMapper.readValue(msg, Transaction::class.java)
-        transactionControllerImp.makeTransaction(transaction)
+        transactionService.start(transaction)
     }
 
 }

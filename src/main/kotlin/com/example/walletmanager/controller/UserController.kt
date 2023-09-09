@@ -13,7 +13,7 @@ interface UserController {
     @GetMapping("/{id}")
     fun getById(@PathVariable id: Int): FullUserResponse?
 
-    @PostMapping("/create")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(@RequestBody userName: SetOrChangeName): FullUserResponse?
 

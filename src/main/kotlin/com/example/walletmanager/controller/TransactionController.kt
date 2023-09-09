@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/transaction")
 interface TransactionController {
-    @PutMapping
+    @PutMapping("")
     @ResponseStatus(HttpStatus.OK)
-    fun start(@RequestBody transaction: Transaction): TransactionResponse?
+    fun create(@RequestBody transaction: Transaction): TransactionResponse?
 }
