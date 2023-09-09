@@ -1,0 +1,24 @@
+server:
+    port: 9090
+spring:
+    datasource:
+        password: adverge_password
+        url: jdbc:postgresql://localhost:5432/walletmanager
+        username: adverge_user
+    elasticsearch:
+        password: elastic
+        uris: http://localhost:9200
+        username: elastic
+    jpa:
+        hibernate:
+            ddl-auto: create
+    kafka:
+        bootstrap-servers: localhost:9092
+        consumer:
+            group-id: myGroup
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
