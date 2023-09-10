@@ -9,6 +9,5 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/transaction")
 interface TransactionController {
     @PutMapping("")
-    @ResponseStatus(HttpStatus.OK)
     fun create(@RequestBody transaction: Transaction): TransactionResponse?
 }

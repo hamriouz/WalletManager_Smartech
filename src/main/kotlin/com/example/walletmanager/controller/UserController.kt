@@ -14,11 +14,9 @@ interface UserController {
     fun getById(@PathVariable id: Int): FullUserResponse?
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     fun create(@RequestBody userName: SetOrChangeName): FullUserResponse?
 
     @PutMapping("/rename/{id}")
-    @ResponseStatus(HttpStatus.OK)
     fun rename(@RequestBody newName: SetOrChangeName, @PathVariable id: Int): FullUserResponse?
 
 }
