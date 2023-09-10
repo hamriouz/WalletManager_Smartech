@@ -1,11 +1,10 @@
- server:
+server:
     port: 9090
     error:
         include-message: always
         include-binding-errors: always
         include-exception: false
         include-stacktrace: never
-
 spring:
     datasource:
         password: adverge_password
@@ -27,4 +26,3 @@ spring:
         producer:
             key-serializer: org.apache.kafka.common.serialization.StringSerializer
             value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
