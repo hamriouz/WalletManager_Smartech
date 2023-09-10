@@ -1,6 +1,7 @@
 package com.example.walletmanager.service
 
 import com.example.walletmanager.controller.TransactionController
+import com.example.walletmanager.controller.exception.TransactionValidationException
 import com.example.walletmanager.kafka.AppConstants
 import com.example.walletmanager.model.ResponseResult
 import com.example.walletmanager.model.Transaction
@@ -11,8 +12,10 @@ import com.example.walletmanager.repository.TransactionResultRepository
 import com.example.walletmanager.repository.WalletRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import javax.transaction.Transactional
 
 @Service
@@ -28,9 +31,10 @@ class TransactionService(
         val errors = validateInput(transaction)
         if (errors.isEmpty()) {
             kafkaTemplate.send(AppConstants.KAFKA_TRANSACTION, objectMapper.writeValueAsString(transaction))
-            return TransactionResponse(errors, ResponseResult.OK)
+            return TransactionResponse(ResponseResult.OK)
         }
-        return TransactionResponse(errors, ResponseResult.ERROR)
+        val ex = TransactionValidationException(errors.toString())
+        throw ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, ex.message, ex)
     }
 
     fun makeTransaction2(transaction: Transaction) {
@@ -52,7 +56,7 @@ class TransactionService(
     }
 
     fun validateInput(transaction: Transaction): MutableList<String> {
-        var errors = mutableListOf<String>()
+        val errors = mutableListOf<String>()
         var errorMessage: String?
         if (transaction.amount < 0) {
             errorMessage = "Negative Transaction Amount"
