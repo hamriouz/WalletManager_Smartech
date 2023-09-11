@@ -12,10 +12,8 @@ import com.example.walletmanager.repository.TransactionResultRepository
 import com.example.walletmanager.repository.WalletRepository
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import javax.transaction.Transactional
 
 @Service
@@ -33,8 +31,7 @@ class TransactionService(
             kafkaTemplate.send(AppConstants.KAFKA_TRANSACTION, objectMapper.writeValueAsString(transaction))
             return TransactionResponse(ResponseResult.OK)
         }
-        val ex = TransactionValidationException(errors.toString())
-        throw ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, ex.message, ex)
+        throw TransactionValidationException(errors.toString())
     }
 
     fun makeTransaction2(transaction: Transaction) {

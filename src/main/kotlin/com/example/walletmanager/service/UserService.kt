@@ -2,16 +2,13 @@ package com.example.walletmanager.service
 
 import com.example.walletmanager.UserController
 import com.example.walletmanager.controller.exception.InvalidUsernameException
-import com.example.walletmanager.controller.exception.RenamingExceptionController
 import com.example.walletmanager.controller.exception.UserNotFoundException
 import com.example.walletmanager.model.*
 import com.example.walletmanager.model.response.FullUserResponse
 import com.example.walletmanager.repository.UserRepository
 import com.example.walletmanager.repository.WalletRepository
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
-import org.springframework.web.server.ResponseStatusException
 
 
 @Service
@@ -37,40 +34,28 @@ class UserService(
 
     @Transactional
     override fun rename(newName: SetOrChangeName, id: Int): FullUserResponse? {
-        val errors = validateRenaming(id, newName.name)
-        if (errors.isEmpty()) {
-            val user = userRepository.findById(id)
-            user.get().ownerName = newName.name
-            userRepository.save(user.get())
-            return getById(id)
-        }
-        val ex = RenamingExceptionController(errors.toString())
-        throw ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,ex.message, ex)
+        validateRenaming(id, newName.name)
+        val user = userRepository.findById(id)
+        user.get().ownerName = newName.name
+        userRepository.save(user.get())
+        return getById(id)
     }
 
     fun validateUserId(id: Int) {
         if (userRepository.findById(id).isEmpty) {
-            val ex = UserNotFoundException("User not found!")
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message, ex)
+            throw UserNotFoundException("User not found!")
         }
     }
 
     fun validateName(name: String) {
         if (name == "" || name.isEmpty()) {
-            val ex = InvalidUsernameException("Please provide a valid username!")
-            throw ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, ex.message, ex)
+            throw InvalidUsernameException("Please provide a valid username!")
         }
     }
 
-    fun validateRenaming(id: Int, name: String) : MutableList<String> {
-        val errors = mutableListOf<String>()
-        if (userRepository.findById(id).isEmpty) {
-            errors.add("User not found!")
-        }
-        if (name == "" || name.isEmpty()) {
-            errors.add("Please provide a valid username!")
-        }
-        return errors
+    fun validateRenaming(id: Int, name: String) {
+        validateUserId(id)
+        validateName(name)
     }
 }
 
