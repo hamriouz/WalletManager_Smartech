@@ -1,5 +1,8 @@
-package com.example.walletmanager.controller.exception
+package com.example.walletmanager.controller
 
+import com.example.walletmanager.controller.exception.InvalidUsernameException
+import com.example.walletmanager.controller.exception.TransactionValidationException
+import com.example.walletmanager.controller.exception.UserNotFoundException
 import com.example.walletmanager.model.response.ErrorMessage
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -9,7 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 
 @ControllerAdvice
-class RestResponseEntityHandler: ResponseEntityExceptionHandler() {
+class RestExceptionResponseController: ResponseEntityExceptionHandler() {
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFoundException(ex: UserNotFoundException) : ResponseEntity<ErrorMessage> {
         val errorMessage = ErrorMessage(
