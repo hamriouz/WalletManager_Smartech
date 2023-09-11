@@ -1,44 +1,57 @@
 package com.example.walletmanager.controller
 
 import com.example.walletmanager.WalletManagerApplicationTests
+import com.example.walletmanager.kafka.KafkaConsumer
+import com.example.walletmanager.model.SetOrChangeName
 import com.example.walletmanager.model.Transaction
 import com.example.walletmanager.model.TransactionType
-import com.example.walletmanager.service.TransactionService
-import com.example.walletmanager.service.UserService
-import org.junit.jupiter.api.Test
+import com.example.walletmanager.repository.WalletRepository
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.awaitility.Awaitility
 import org.junit.jupiter.api.Assertions.*
-import com.example.walletmanager.model.SetOrChangeName
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
+import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
+import java.time.Duration
+import java.util.*
 
 
 @AutoConfigureMockMvc
+@SpringBootTest
+@DirtiesContext
+@EmbeddedKafka(partitions = 1, brokerProperties = ["listeners=PLAINTEXT://localhost:9092", "port=9092"])
 class TransactionControllerTest @Autowired constructor(
-    private val transactionService: TransactionService,
-    private val userService: UserService,
-): WalletManagerApplicationTests() {
+    val mockMvc: MockMvc,
+    var objectMapper: ObjectMapper,
+    val walletRepository: WalletRepository,
+    val consumer: KafkaConsumer
 
-
+) : WalletManagerApplicationTests() {
     @Test
-    fun `should contain amount is negative error`() {
-        val transaction = Transaction(TransactionType.DECREASE, 123, -100)
-        val errors = transactionService.validateInput(transaction)
-        println(errors)
-        assertTrue(errors.contains("Negative Transaction Amount"))
-    }
+    fun `should start a successful transaction`() {
+        val newUser = SetOrChangeName("newUser")
+        mockMvc.post("/api/user") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(newUser)
+        }
+        val newTransaction = Transaction(TransactionType.INCREASE, 1, 15000)
+        mockMvc.put("/api/transaction") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(newTransaction)
+        }
 
-    @Test
-    fun `should return false when userId does not exist`() {
-        val transaction = Transaction(TransactionType.DECREASE, 123, 100)
-        val errors = transactionService.validateInput(transaction)
-        assertTrue(errors.contains("Invalid userId input"))
-    }
+        Awaitility.await().atMost(Duration.ofSeconds(15))
+            .until { Objects.nonNull(consumer.payload) }
 
-    @Test
-    fun `should return true when all fields where ok`() {
-        val user = userService.create(SetOrChangeName("usssernaaame"))
-        val transaction = user?.let { Transaction(TransactionType.INCREASE, it.userId, 1000) }
-        val errors = transaction?.let { transactionService.validateInput(it) }
-        assertTrue(errors!!.isEmpty())
+
+        val userWallet = walletRepository.findByUserId(1)
+        assertEquals(userWallet!!.balance, 15000)
     }
 }

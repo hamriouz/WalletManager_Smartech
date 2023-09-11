@@ -12,10 +12,12 @@ class KafkaConsumer(
     private val transactionService: TransactionService
 
     ) {
+    var payload: String? = null
     @KafkaListener(topics = [AppConstants.KAFKA_TRANSACTION])
     fun listen(msg: String) {
         val transaction = objectMapper.readValue(msg, Transaction::class.java)
         transactionService.start(transaction)
+        payload = msg
     }
 
 }

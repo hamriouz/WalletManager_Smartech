@@ -24,7 +24,7 @@ class UserControllerTest @Autowired constructor(
     @Test
     fun `should create user`() {
         val newUser = SetOrChangeName("newUser")
-        mockMvc.post("/api/user/create") {
+        mockMvc.post("/api/user") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(newUser)
         }
@@ -35,7 +35,7 @@ class UserControllerTest @Autowired constructor(
     @Test
     fun `should rename user`() {
         val newUser = SetOrChangeName("newUser")
-        mockMvc.post("/api/user/create") {
+        mockMvc.post("/api/user") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(newUser)
         }
