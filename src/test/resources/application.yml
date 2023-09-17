@@ -1,0 +1,30 @@
+server:
+    port: 9040
+    error:
+    include-message: always
+    include-binding-errors: always
+    include-exception: false
+    include-stacktrace: never
+spring:
+  datasource:
+    password:
+    url: jdbc:postgresql://localhost:6543/walletmanagertest
+    username: wallet_user_test
+  elasticsearch:
+    uris: http://localhost:19200
+    username: elastic
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: myGroup
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+test:
+  topic: embedded-test-topic
