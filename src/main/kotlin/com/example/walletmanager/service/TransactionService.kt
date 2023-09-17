@@ -1,15 +1,14 @@
 package com.example.walletmanager.service
 
-import com.example.walletmanager.controller.TransactionController
-import com.example.walletmanager.controller.exception.TransactionValidationException
-import com.example.walletmanager.kafka.AppConstants
-import com.example.walletmanager.model.ResponseResult
-import com.example.walletmanager.model.Transaction
-import com.example.walletmanager.model.TransactionResult
-import com.example.walletmanager.model.TransactionType
-import com.example.walletmanager.model.response.TransactionResponse
-import com.example.walletmanager.repository.TransactionResultRepository
-import com.example.walletmanager.repository.WalletRepository
+import com.example.walletmanager.web.TransactionWeb
+import com.example.walletmanager.service.exception.TransactionValidationException
+import com.example.walletmanager.service.kafka.AppConstants
+import com.example.walletmanager.data.model.Transaction
+import com.example.walletmanager.data.model.TransactionElasticSearch
+import com.example.walletmanager.enums.TransactionType
+import com.example.walletmanager.data.repository.TransactionResultRepository
+import com.example.walletmanager.data.repository.WalletRepository
+import com.example.walletmanager.web.model.request.TransactionRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -22,16 +21,12 @@ class TransactionService(
     private val transactionResultRepository: TransactionResultRepository,
     private val objectMapper: ObjectMapper,
     val kafkaTemplate: KafkaTemplate<String, String>,
-): TransactionController {
+) : TransactionWeb {
     var logger = LoggerFactory.getLogger(TransactionService::class.java)!!
 
-    override fun create(transaction: Transaction): TransactionResponse? {
-        val errors = validateInput(transaction)
-        if (errors.isEmpty()) {
-            kafkaTemplate.send(AppConstants.KAFKA_TRANSACTION, objectMapper.writeValueAsString(transaction))
-            return TransactionResponse(ResponseResult.OK)
-        }
-        throw TransactionValidationException(errors.toString())
+    override fun create(transaction: TransactionRequest) {
+        validateInput(transaction)
+        kafkaTemplate.send(AppConstants.KAFKA_TRANSACTION, objectMapper.writeValueAsString(transaction))
     }
 
     fun makeTransaction2(transaction: Transaction) {
@@ -42,17 +37,17 @@ class TransactionService(
     fun start(transaction: Transaction) {
         val wallet = walletRepository.findByUserId(transaction.userId)!!
         if (transaction.type == TransactionType.DECREASE && wallet.balance!! >= transaction.amount) {
-                wallet.balance = wallet.balance?.minus(transaction.amount)
+            wallet.balance = wallet.balance?.minus(transaction.amount)
         } else if (transaction.type == TransactionType.INCREASE) {
             wallet.balance = wallet.balance?.plus(transaction.amount)
         }
         walletRepository.save(wallet)
 //        throw RuntimeException("Test")
         logger.info("TransactionService::makeTransaction::userId=${transaction.userId}::amount=${transaction.amount}::type=${transaction.type}")
-        transactionResultRepository.save(TransactionResult(true, transaction.userId, "None"))
+        transactionResultRepository.save(TransactionElasticSearch(transaction.userId, transaction.amount, transaction.type))
     }
 
-    fun validateInput(transaction: Transaction): MutableList<String> {
+    fun validateInput(transaction: TransactionRequest) {
         val errors = mutableListOf<String>()
         var errorMessage: String?
         if (transaction.amount < 0) {
@@ -65,7 +60,9 @@ class TransactionService(
             errorMessage = "Invalid userId input"
             errors.add(errorMessage)
         }
-        return errors
+        if (errors.isNotEmpty()) {
+            throw TransactionValidationException(errors)
+        }
     }
 
 }
