@@ -9,7 +9,7 @@ import org.springframework.test.context.TestConstructor
 
 @AutoConfigureMockMvc
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = ["listeners=PLAINTEXT://localhost:9092", "port=9092"])
+@EmbeddedKafka(partitions = 1, brokerProperties = ["listeners=PLAINTEXT://localhost:19092", "port=19092"])
 @SpringBootTest(
     classes = [WalletManagerApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT

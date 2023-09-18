@@ -1,6 +1,5 @@
 package com.example.walletmanager.data.model
 
-import java.util.*
 import javax.persistence.*
 
 
